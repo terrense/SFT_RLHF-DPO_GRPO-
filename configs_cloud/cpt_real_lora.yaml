@@ -1,0 +1,50 @@
+# ============================================================
+# 阶段① CPT 继续预训练 —— 真实医学教科书语料(机制 + 遗忘实验)
+# 第一个实验:这份是 lr=1e-5 基线。
+# 做对照时:复制本文件,只改 learning_rate=1.0e-4 和 output_dir,跑第二个,
+# 对比两者在留出医疗文本/通用文本上的困惑度 → 亲眼看灾难性遗忘。
+# 启动:llamafactory-cli train configs/cpt_real_lora.yaml
+# ============================================================
+
+### model
+model_name_or_path: /data/shenxin/rlhf_lab/models/Qwen3-8B-Base
+trust_remote_code: true
+
+### method
+stage: pt                      # pt = 预训练/CPT:loss 算在所有 token 上,无 mask
+do_train: true
+finetuning_type: lora
+lora_rank: 16
+lora_target: all
+
+### dataset
+dataset: med_cpt_real
+dataset_dir: /data/shenxin/rlhf_lab/data
+cutoff_len: 2048
+max_samples: 4000              # 先小批跑通看现象;放量再调大
+packing: true                  # 把文档拼满上下文,提效(CPT 常开)
+preprocessing_num_workers: 8
+
+### output
+output_dir: /data/shenxin/rlhf_lab/outputs/cpt_real_lr1e-5
+logging_steps: 10
+save_steps: 500
+plot_loss: true                # 自动出 loss 曲线图
+overwrite_output_dir: true
+report_to: none
+
+### train  —— 要感受的参数都在这一块
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 8         # 有效 batch = 2*8 = 16
+learning_rate: 1.0e-5                  # ★核心:CPT 要远小于预训练;对照组改 1.0e-4
+num_train_epochs: 1.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.05
+bf16: true
+gradient_checkpointing: true           # 省显存,单卡必开
+
+### eval —— 留出集上看困惑度(eval_loss 越低 ppl 越低)
+val_size: 0.02
+per_device_eval_batch_size: 2
+eval_strategy: steps
+eval_steps: 200

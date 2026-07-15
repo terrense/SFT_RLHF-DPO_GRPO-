@@ -1,0 +1,17 @@
+# 大文件不进git(GitHub单文件限100MB)
+models/
+trained_adapters/
+data/
+*.safetensors
+*.pt
+*.bin
+# 大训练数据(在本地/服务器,不上传)
+**/train_full.json
+**/train_sharegpt.json
+**/train.jsonl
+**/05_sampled_balanced.jsonl
+**/subset_40k.json
+# 临时/缓存
+__pycache__/
+*.pyc
+.minimax_env

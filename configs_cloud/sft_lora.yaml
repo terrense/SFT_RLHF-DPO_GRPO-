@@ -1,0 +1,50 @@
+# ============================================================
+# 阶段② SFT 监督微调 —— 把 base 变成会答医疗问题的模型
+# 数据:你的 51万医疗问答(抽样)。loss 只算在“回答”上(LLaMA-Factory 默认)。
+# 可做对照:lora_rank 8 vs 64;num_train_epochs 1 vs 3(看过拟合);finetuning_type full vs lora。
+# 启动:llamafactory-cli train configs/sft_lora.yaml
+# ============================================================
+
+### model
+model_name_or_path: /data/shenxin/rlhf_lab/models/Qwen3-8B-Base   # 也可换成 CPT 产物做“CPT→SFT”链
+trust_remote_code: true
+
+### method
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 16                  # ★对照点:8 vs 64
+lora_target: all
+
+### dataset
+dataset: med_sft
+dataset_dir: /data/shenxin/rlhf_lab/data
+template: qwen3                # 用 Qwen3 对话模板教 base 学“问答格式”
+cutoff_len: 1024
+max_samples: 8000              # 先抽 8k 跑通;放量再调
+packing: false
+preprocessing_num_workers: 8
+
+### output
+output_dir: /data/shenxin/rlhf_lab/outputs/sft_lora_r16_e2
+logging_steps: 10
+save_steps: 500
+plot_loss: true
+overwrite_output_dir: true
+report_to: none
+
+### train
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 8         # 有效 batch = 16
+learning_rate: 1.0e-4                  # LoRA 用 1e-4;若改 full 用 ~1e-5
+num_train_epochs: 2.0                  # ★对照点:1 vs 3 看过拟合
+lr_scheduler_type: cosine
+warmup_ratio: 0.03
+bf16: true
+gradient_checkpointing: true
+
+### eval
+val_size: 0.02
+per_device_eval_batch_size: 2
+eval_strategy: steps
+eval_steps: 200

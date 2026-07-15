@@ -1,0 +1,27 @@
+# Data-Juicer 医疗数据清洗流水线 demo
+project_name: 'med_dj_demo'
+dataset_path: '/data/shenxin/rlhf_lab/data/med_zh/med_dj.jsonl'
+export_path: '/data/shenxin/rlhf_lab/data/med_zh/med_dj_cleaned.jsonl'
+np: 8
+text_keys: 'text'
+open_tracer: true            # 记录每个OP删/改了哪些样本 → 可追溯
+trace_num: 10
+
+process:
+  # --- Mapper 规范化/脱敏 ---
+  - whitespace_normalization_mapper:
+  - clean_email_mapper:
+  - clean_links_mapper:
+  # --- Filter 质量过滤 ---
+  - text_length_filter:
+      min_len: 10
+      max_len: 2000
+  - character_repetition_filter:
+      rep_len: 10
+      max_ratio: 0.5
+  - special_characters_filter:
+      max_ratio: 0.4
+  # --- Deduplicator 去重 ---
+  - document_minhash_deduplicator:
+      tokenization: 'character'
+      jaccard_threshold: 0.85

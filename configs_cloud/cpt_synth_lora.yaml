@@ -1,0 +1,36 @@
+# ============================================================
+# CPT 合成知识注入 —— 把虚构规范 HG-LN-2026 灌进模型(可测演示)
+# 小语料(851段)+ 多epoch,目标:base对探针≈0% → CPT后大幅上升
+# 启动:llamafactory-cli train configs/cpt_synth_lora.yaml
+# ============================================================
+model_name_or_path: /data/shenxin/rlhf_lab/models/Qwen3-8B-Base
+trust_remote_code: true
+
+stage: pt
+do_train: true
+finetuning_type: lora
+lora_rank: 32            # 比真实CPT略大,给注入更多容量
+lora_target: all
+
+dataset: med_cpt_synth
+dataset_dir: /data/shenxin/rlhf_lab/data
+cutoff_len: 1024
+max_samples: 100000
+packing: true
+preprocessing_num_workers: 8
+
+output_dir: /data/shenxin/rlhf_lab/outputs/cpt_synth_lora
+logging_steps: 5
+save_steps: 2000
+plot_loss: true
+overwrite_output_dir: true
+report_to: none
+
+per_device_train_batch_size: 4
+gradient_accumulation_steps: 4         # 有效batch=16
+learning_rate: 1.0e-4
+num_train_epochs: 5.0                  # 小语料多跑几轮才注入得进
+lr_scheduler_type: cosine
+warmup_ratio: 0.05
+bf16: true
+gradient_checkpointing: true
