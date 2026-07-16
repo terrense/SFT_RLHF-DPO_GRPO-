@@ -1,0 +1,16 @@
+name|dsconfig|micro|accum|gradckpt|globalBatch|peakMB|sec|samples_per_s
+base|z2_base.json|8|1|false|32|21575|46|41.7
+micro2|z2_base.json|2|4|false|32|9547|56|34.3
+gradckpt|z2_base.json|8|1|true|32|21575|44|43.6
+smallbucket|z2_smallbucket.json|8|1|false|32|21295|44|43.6
+bigbucket|z2_bigbucket.json|8|1|false|32|21875|46|41.7
+nooverlap|z2_nooverlap.json|8|1|false|32|21435|46|41.7
+
+# 单变量对照:每次只从 ZeRO-2 基线改一个旋钮, global batch 恒为 32 (= micro x accum x DP=4)
+# 峰值显存由后台 nvidia-smi 每秒轮询取最高水位。sec 为含初始化的墙钟时间。
+# 核心发现:
+#   micro_batch 是唯一显著移动峰值显存的旋钮 (8->2: 21.6GB->9.5GB, -56%, 慢18%)
+#   gradient_checkpointing 已确认启用但峰值不变 —— nvidia-smi 读的是分配器高水位,
+#     激活重算减少的是"存下的"激活, 不是前向单层瞬时峰值 (详见 REPORT_distributed_training.md §1.5)
+#   bucket_size: 20M(21.3GB) < 200M(21.6GB) < 1000M(21.9GB), 方向符合理论, 小模型上仅二阶
+#   overlap_comm 关闭在 0.5B 上无感 (通信量太小无可掩盖)

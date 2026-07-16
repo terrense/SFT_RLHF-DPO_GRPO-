@@ -89,6 +89,8 @@ GRPO 阶段以**规则奖励(答对=1)**做可验证强化学习,选择题正确
 | 目录 | 内容 |
 |---|---|
 | **[analysis/REPORT.md](analysis/REPORT.md)** | **完整实验报告(方法+结果+原理)** |
+| **[analysis/REPORT_distributed_training.md](analysis/REPORT_distributed_training.md)** | **分布式训练与推理优化教程(DeepSpeed/ZeRO 调参实测 + ONNX/TensorRT)** |
+| `distributed_lab/` | ZeRO 配置 / 调参 sweep 脚本 / 实测汇总 |
 | `analysis/figures/` | 6 组图表(PNG 300dpi)+ 画图脚本 |
 | `analysis/archive/` | 11 条训练 loss 原始日志 + 各阶段评测日志 |
 | `scripts_cloud/` | 全部脚本:数据管线 / 训练 / 评测 / DPO / GRPO / 服务 |

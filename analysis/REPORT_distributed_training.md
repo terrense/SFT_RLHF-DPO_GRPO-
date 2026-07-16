@@ -55,6 +55,56 @@
 - `overlap_comm: true` + `contiguous_gradients: true` 能让通信和计算重叠,缓解 ZeRO-2/3 的通信开销。
 - LLaMA-Factory 用法:yaml 里 `deepspeed: <config.json>` + `FORCE_TORCHRUN=1` 多卡启动即可。
 
+### 1.5 手把手调参实测:五个旋钮各自的效果(单变量对照)
+
+光看文档记不住调参项。这一轮我做了**单变量对照**——从 ZeRO-2 基线出发,每次**只改一个旋钮**,固定 **global batch = 32** 不变(公式 `global = micro × grad_accum × DP_size`,这里 DP_size=4),测每卡峰值显存与吞吐。这样每个数字都能干净归因到那一个旋钮。
+
+**先厘清 batch size 的三个层级**(最容易搞混的点):
+- **micro batch(`per_device_train_batch_size`)**:一次前向/反向,单卡实际塞进去的样本数。**它直接决定激活值显存**——OOM 时第一个该动的就是它。
+- **gradient accumulation**:攒多少个 micro batch 才做一次 `optimizer.step()`。用"多攒几步"换"等效大 batch",**不增加显存**(但增加时间,因为要多跑几次前向反向)。
+- **global batch = micro × accum × DP_size**:真正影响**收敛/学习率**的有效批大小。注意乘的是 **DP_size(数据并行度)**,不是 world_size——若还开了 TP/PP,DP_size < 卡数。
+
+**实测结果**(Qwen2.5-0.5B 全参,四卡,60步,global batch 恒为 32):
+
+| 配置(单变量) | 改了什么 | micro | accum | 峰值显存/卡 | 吞吐(样本/s) | 结论 |
+|---|---|---|---|---|---|---|
+| **base** | ZeRO-2 基线 | 8 | 1 | 21,575 MB | 41.7 | 基准 |
+| **micro=2** | micro 8→2(accum 补到4) | 2 | 4 | **9,547 MB(−56%)** | 34.3(−18%) | **显存唯一有效杠杆** |
+| **grad_ckpt on** | 开激活重算 | 8 | 1 | 21,575 MB(不变) | 43.6(持平) | 小模型上峰值不动(见下) |
+| **bucket 20M** | reduce/allgather 桶 200M→20M | 8 | 1 | 21,295 MB | 43.6 | 略省显存 |
+| **bucket 1000M** | 桶 200M→1000M | 8 | 1 | 21,875 MB | 41.7 | 略费显存 |
+| **overlap off** | overlap_comm 关 | 8 | 1 | 21,435 MB | 41.7 | 小规模无感 |
+
+![调参对照](figures/fig7_deepspeed_tuning.png)
+*图 · DeepSpeed 五旋钮单变量对照。全局 batch 恒为 32。**只有 micro_batch 显著移动峰值显存**(左,绿柱 −56%),代价是慢 18%(右);其余旋钮在 0.5B/短序列上都是二阶效应。*
+
+**逐个旋钮的解读**:
+
+**① `train_micro_batch_size_per_gpu`——显存的第一杠杆(最重要)**
+micro 从 8 降到 2、accum 从 1 补到 4(保持 global=32 与学习动态不变),峰值显存直接从 21.5GB 砍到 **9.5GB(−56%)**。这 12GB 的差就是**激活值**——激活值随 micro_batch 线性增长。代价:accum=4 意味着一次 optimizer step 要跑 4 次前向反向,吞吐掉 18%。**这是 OOM 时最可靠的救命操作**:降 micro_batch + 升 accum,显存大降、有效 batch 不变,只是慢一点。
+
+**② `gradient_checkpointing`(激活重算)——一个反直觉的实测坑**
+日志确认它**真的启用了**(`Gradient checkpointing enabled`),但峰值显存和吞吐**都没变**。为什么?这恰好暴露了一个关键区别:
+- `nvidia-smi` 报的是**显存分配器的历史最高水位(reserved high-water)**。
+- 激活重算减少的是"**为反向而存下来的**"激活;但**前向时单层那一下的瞬时大张量(micro=8 那么大)照样要 materialize**。分配器在第一次前向就被这个瞬时峰值撑到 21.5GB,之后缓存不还——所以 `nvidia-smi` 读数不变。
+- 而降 micro_batch 连"单层瞬时张量"本身都变小了,分配器高水位才真正下降(这就是①能降到 9.5GB 的原因)。
+- 重算的速度代价(理论 −20~30%)在 0.5B 上被"模型太小、重算几乎不花钱"掩盖了。
+**教训**:激活重算的真正价值在**激活值主导显存**时(大 micro_batch / 长序列 / 大模型)才显现,能让你把省下的激活预算换成更长的图/更大的 batch;但它未必降低 `nvidia-smi` 看到的那个"单次前向瞬时峰值"。**要压那个峰值,降 micro_batch 更直接。**
+
+**③ `reduce_bucket_size` / `allgather_bucket_size`——通信桶,显存与通信次数的权衡**
+这两个值是 ZeRO 做梯度 reduce-scatter / 参数 all-gather 时的**分块缓冲区大小**(单位是元素数,常用 ~2×10⁸)。桶越大 → 单次通信搬得越多、通信次数越少(带宽利用率高),但**缓冲区占的显存越大**;桶越小则相反。实测方向完全吻合:20M 桶 21.3GB < 200M 基线 21.6GB < 1000M 桶 21.9GB。**在 0.5B 上差异仅 ~0.6GB(二阶效应)**,但在大模型 / 慢互联(5090 无 NVLink)上,桶大小是平衡"通信效率 vs 显存峰值"的实用旋钮——显存吃紧就调小桶。
+
+**④ `overlap_comm`——通信与计算重叠**
+开启后,梯度的 reduce 通信会和反向计算**重叠**进行(边算边传),掩盖通信延迟。实测关掉它峰值/吞吐几乎无变化——**因为 0.5B 通信量太小,没什么可掩盖的**。它的价值在**通信成为瓶颈时**(大模型、ZeRO-3 频繁 all-gather、慢互联)才明显。代价是重叠需要额外的 buffer,会略抬显存,所以显存极限时可以关掉换一点空间。
+
+**⑤ `contiguous_gradients`——把梯度拷进连续内存**
+全程开启(默认 true)。它把分散的梯度收拢到一块连续显存里再做 reduce,**减少内存碎片**、让通信更高效,是 ZeRO-2/3 的标配。小模型上收益不显著,但几乎无副作用,保持默认即可。
+
+**这一轮的核心可迁移经验**:
+1. **OOM 急救顺序**:先降 `micro_batch` + 升 `grad_accum`(保 global batch)→ 再开 `gradient_checkpointing`(长序列/大模型才有效)→ 再调小 bucket / 关 overlap 抠最后几百 MB → 还不够才上 ZeRO-3 / offload。
+2. **`nvidia-smi` 看的是分配器高水位,不是"当前真实占用"**——这解释了为什么 gradient_checkpointing 在小模型上"看起来没用"。理解这一层,才不会被显存读数误导。
+3. **大部分调参项在小模型/短序列上是二阶效应**;它们的价值随模型规模、序列长度、互联速度放大。**先分清"显存瓶颈到底在激活值还是优化器状态/权重",再选对应的旋钮**——这比背参数表有用得多。
+
 ---
 
 ## 第二部分:Megatron-LM —— 张量并行 / 流水线并行
