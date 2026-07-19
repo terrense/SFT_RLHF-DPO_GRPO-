@@ -1,0 +1,422 @@
+{
+  "sample_size": 2002,
+  "n_skipped_no_assistant_ending": 0,
+  "by_task_type": {
+    "chronic_disease_management": {
+      "n": 167,
+      "token_length": {
+        "p50": 174,
+        "p75": 220,
+        "p90": 279,
+        "p95": 294,
+        "p99": 463,
+        "max": 543,
+        "mean": 187.9
+      },
+      "supervised_token_length": {
+        "p50": 101,
+        "p75": 148,
+        "p90": 195,
+        "p95": 211,
+        "p99": 227,
+        "max": 408,
+        "mean": 115.6
+      },
+      "supervised_token_share_of_own_tokens": 0.6154,
+      "supervised_token_share_of_all_supervised": 0.0726
+    },
+    "conversation_summary_structured_output": {
+      "n": 67,
+      "token_length": {
+        "p50": 709,
+        "p75": 957,
+        "p90": 1080,
+        "p95": 1363,
+        "p99": 1531,
+        "max": 2181,
+        "mean": 787.3
+      },
+      "supervised_token_length": {
+        "p50": 82,
+        "p75": 85,
+        "p90": 89,
+        "p95": 94,
+        "p99": 97,
+        "max": 97,
+        "mean": 80.3
+      },
+      "supervised_token_share_of_own_tokens": 0.1019,
+      "supervised_token_share_of_all_supervised": 0.0202
+    },
+    "health_encyclopedia_qa": {
+      "n": 367,
+      "token_length": {
+        "p50": 147,
+        "p75": 181,
+        "p90": 229,
+        "p95": 276,
+        "p99": 364,
+        "max": 452,
+        "mean": 161.5
+      },
+      "supervised_token_length": {
+        "p50": 81,
+        "p75": 110,
+        "p90": 144,
+        "p95": 187,
+        "p99": 282,
+        "max": 411,
+        "mean": 96.2
+      },
+      "supervised_token_share_of_own_tokens": 0.5954,
+      "supervised_token_share_of_all_supervised": 0.1328
+    },
+    "hospital_policy_rag_qa": {
+      "n": 65,
+      "token_length": {
+        "p50": 267,
+        "p75": 273,
+        "p90": 278,
+        "p95": 279,
+        "p99": 291,
+        "max": 292,
+        "mean": 249.0
+      },
+      "supervised_token_length": {
+        "p50": 55,
+        "p75": 57,
+        "p90": 59,
+        "p95": 61,
+        "p99": 65,
+        "max": 66,
+        "mean": 46
+      },
+      "supervised_token_share_of_own_tokens": 0.1847,
+      "supervised_token_share_of_all_supervised": 0.0112
+    },
+    "medication_guidance_safe": {
+      "n": 100,
+      "token_length": {
+        "p50": 191,
+        "p75": 249,
+        "p90": 400,
+        "p95": 471,
+        "p99": 712,
+        "max": 1015,
+        "mean": 224.3
+      },
+      "supervised_token_length": {
+        "p50": 140,
+        "p75": 181,
+        "p90": 266,
+        "p95": 298,
+        "p99": 341,
+        "max": 528,
+        "mean": 149.1
+      },
+      "supervised_token_share_of_own_tokens": 0.6649,
+      "supervised_token_share_of_all_supervised": 0.0561
+    },
+    "pre_consultation_multiturn": {
+      "n": 201,
+      "token_length": {
+        "p50": 667,
+        "p75": 851,
+        "p90": 1014,
+        "p95": 1099,
+        "p99": 1255,
+        "max": 1410,
+        "mean": 692.7
+      },
+      "supervised_token_length": {
+        "p50": 328,
+        "p75": 497,
+        "p90": 551,
+        "p95": 569,
+        "p99": 657,
+        "max": 737,
+        "mean": 386.8
+      },
+      "supervised_token_share_of_own_tokens": 0.5584,
+      "supervised_token_share_of_all_supervised": 0.2925
+    },
+    "risk_redflag_safety_refusal": {
+      "n": 134,
+      "token_length": {
+        "p50": 225,
+        "p75": 253,
+        "p90": 269,
+        "p95": 299,
+        "p99": 529,
+        "max": 553,
+        "mean": 226.1
+      },
+      "supervised_token_length": {
+        "p50": 107,
+        "p75": 122,
+        "p90": 138,
+        "p95": 152,
+        "p99": 384,
+        "max": 388,
+        "mean": 112.7
+      },
+      "supervised_token_share_of_own_tokens": 0.4985,
+      "supervised_token_share_of_all_supervised": 0.0568
+    },
+    "symptom_consultation": {
+      "n": 467,
+      "token_length": {
+        "p50": 143,
+        "p75": 192,
+        "p90": 238,
+        "p95": 269,
+        "p99": 305,
+        "max": 466,
+        "mean": 157.8
+      },
+      "supervised_token_length": {
+        "p50": 95,
+        "p75": 140,
+        "p90": 179,
+        "p95": 209,
+        "p99": 234,
+        "max": 273,
+        "mean": 110.5
+      },
+      "supervised_token_share_of_own_tokens": 0.6999,
+      "supervised_token_share_of_all_supervised": 0.1941
+    },
+    "test_report_explanation": {
+      "n": 200,
+      "token_length": {
+        "p50": 173,
+        "p75": 238,
+        "p90": 326,
+        "p95": 392,
+        "p99": 525,
+        "max": 734,
+        "mean": 201.6
+      },
+      "supervised_token_length": {
+        "p50": 104,
+        "p75": 142,
+        "p90": 215,
+        "p95": 243,
+        "p99": 349,
+        "max": 380,
+        "mean": 120.1
+      },
+      "supervised_token_share_of_own_tokens": 0.5959,
+      "supervised_token_share_of_all_supervised": 0.0904
+    },
+    "triage_guidance": {
+      "n": 234,
+      "token_length": {
+        "p50": 213,
+        "p75": 363,
+        "p90": 462,
+        "p95": 479,
+        "p99": 650,
+        "max": 995,
+        "mean": 248.4
+      },
+      "supervised_token_length": {
+        "p50": 24,
+        "p75": 119,
+        "p90": 234,
+        "p95": 296,
+        "p99": 513,
+        "max": 581,
+        "mean": 83.2
+      },
+      "supervised_token_share_of_own_tokens": 0.3348,
+      "supervised_token_share_of_all_supervised": 0.0732
+    }
+  },
+  "by_source": {
+    "Huatuo26M-Lite": {
+      "n": 506,
+      "token_length": {
+        "p50": 150,
+        "p75": 183,
+        "p90": 228,
+        "p95": 280,
+        "p99": 372,
+        "max": 452,
+        "mean": 164.0
+      },
+      "supervised_token_length": {
+        "p50": 84,
+        "p75": 110,
+        "p90": 144,
+        "p95": 191,
+        "p99": 300,
+        "max": 411,
+        "mean": 96.6
+      },
+      "supervised_token_share_of_own_tokens": 0.5893,
+      "supervised_token_share_of_all_supervised": 0.184
+    },
+    "med_zh_real": {
+      "n": 773,
+      "token_length": {
+        "p50": 153,
+        "p75": 202,
+        "p90": 250,
+        "p95": 282,
+        "p99": 373,
+        "max": 543,
+        "mean": 166.3
+      },
+      "supervised_token_length": {
+        "p50": 101,
+        "p75": 144,
+        "p90": 183,
+        "p95": 207,
+        "p99": 238,
+        "max": 273,
+        "mean": 112.8
+      },
+      "supervised_token_share_of_own_tokens": 0.6786,
+      "supervised_token_share_of_all_supervised": 0.3281
+    },
+    "DISC-Med-SFT": {
+      "n": 124,
+      "token_length": {
+        "p50": 330,
+        "p75": 427,
+        "p90": 528,
+        "p95": 650,
+        "p99": 995,
+        "max": 1015,
+        "mean": 347.5
+      },
+      "supervised_token_length": {
+        "p50": 189,
+        "p75": 266,
+        "p90": 332,
+        "p95": 380,
+        "p99": 546,
+        "max": 581,
+        "mean": 207.9
+      },
+      "supervised_token_share_of_own_tokens": 0.5982,
+      "supervised_token_share_of_all_supervised": 0.097
+    },
+    "derived_from_seed": {
+      "n": 198,
+      "token_length": {
+        "p50": 377,
+        "p75": 568,
+        "p90": 885,
+        "p95": 1061,
+        "p99": 1518,
+        "max": 2181,
+        "mean": 422.4
+      },
+      "supervised_token_length": {
+        "p50": 23,
+        "p75": 75,
+        "p90": 85,
+        "p95": 88,
+        "p99": 96,
+        "max": 97,
+        "mean": 39.9
+      },
+      "supervised_token_share_of_own_tokens": 0.0945,
+      "supervised_token_share_of_all_supervised": 0.0297
+    },
+    "gen_minimax_m3": {
+      "n": 175,
+      "token_length": {
+        "p50": 247,
+        "p75": 266,
+        "p90": 275,
+        "p95": 279,
+        "p99": 299,
+        "max": 338,
+        "mean": 237.7
+      },
+      "supervised_token_length": {
+        "p50": 93,
+        "p75": 110,
+        "p90": 127,
+        "p95": 131,
+        "p99": 146,
+        "max": 162,
+        "mean": 84.4
+      },
+      "supervised_token_share_of_own_tokens": 0.355,
+      "supervised_token_share_of_all_supervised": 0.0556
+    },
+    "internal_seed_flywheel": {
+      "n": 201,
+      "token_length": {
+        "p50": 667,
+        "p75": 851,
+        "p90": 1014,
+        "p95": 1099,
+        "p99": 1255,
+        "max": 1410,
+        "mean": 692.7
+      },
+      "supervised_token_length": {
+        "p50": 328,
+        "p75": 497,
+        "p90": 551,
+        "p95": 569,
+        "p99": 657,
+        "max": 737,
+        "mean": 386.8
+      },
+      "supervised_token_share_of_own_tokens": 0.5584,
+      "supervised_token_share_of_all_supervised": 0.2925
+    },
+    "Chinese-medical-dialogue": {
+      "n": 20,
+      "token_length": {
+        "p50": 136,
+        "p75": 159,
+        "p90": 184,
+        "p95": 210,
+        "p99": 261,
+        "max": 261,
+        "mean": 131.6
+      },
+      "supervised_token_length": {
+        "p50": 83,
+        "p75": 104,
+        "p90": 119,
+        "p95": 120,
+        "p99": 125,
+        "max": 125,
+        "mean": 81.4
+      },
+      "supervised_token_share_of_own_tokens": 0.6185,
+      "supervised_token_share_of_all_supervised": 0.0061
+    },
+    "shibing624-finetune-zh": {
+      "n": 5,
+      "token_length": {
+        "p50": 458,
+        "p75": 462,
+        "p90": 533,
+        "p95": 533,
+        "p99": 533,
+        "max": 533,
+        "mean": 400.4
+      },
+      "supervised_token_length": {
+        "p50": 438,
+        "p75": 442,
+        "p90": 513,
+        "p95": 513,
+        "p99": 513,
+        "max": 513,
+        "mean": 372.4
+      },
+      "supervised_token_share_of_own_tokens": 0.9301,
+      "supervised_token_share_of_all_supervised": 0.007
+    }
+  }
+}
